@@ -2,6 +2,8 @@
 
 WebSocket relay that bridges DatumBridge platform (HTTP/cloud) with DTBClaw devices (edge) running MCP servers. Forwards JSON-RPC over WebSocket with request/response correlation.
 
+**Creating other MCP tools?** Use the reusable playbook (rules, coding conventions, design patterns): [`docs/README.md`](docs/README.md). Start with [`docs/playbook/NEW_MCP_CHECKLIST.md`](docs/playbook/NEW_MCP_CHECKLIST.md).
+
 ## Architecture
 
 ```
@@ -220,8 +222,9 @@ The platform’s MCP service calls `POST {baseURL}/mcp` with JSON-RPC `initializ
 ## Security
 
 - **Token hashing**: Device tokens are stored as bcrypt hashes. Plain-text tokens are returned only once at registration.
-- **Registration protection**: Set `HUB_REGISTER_API_KEY` to require an API key for device registration.
-- **CORS control**: Set `HUB_ALLOWED_ORIGINS` to restrict WebSocket and HTTP origins in production.
+- **Registration protection**: Set `HUB_REGISTER_API_KEY` in production (`empty` = open register, local-dev only). Confirm and some admin GETs are still open in current code — see hub debt notes in [`docs/technical/api-specification.md`](docs/technical/api-specification.md) and [`docs/playbook/SECURITY_RULES.md`](docs/playbook/SECURITY_RULES.md); new relays must not copy those gaps.
+- **CORS / WS Origin**: Set `HUB_ALLOWED_ORIGINS` in production (exact match; never `*`).
+- **MCP session ≠ caller auth**: Production callers should reach `/mcp` via Studio/gateway auth.
 - **Non-root container**: Docker image runs as unprivileged `appuser`.
 - **Body size limit**: HTTP request bodies are limited to 1 MB.
 - **Connection health**: WebSocket connections use ping/pong heartbeats (54s interval, 60s timeout).
@@ -250,6 +253,8 @@ datumbridge-mcp-ws-hub/
 │   ├── middleware.go         # Logging + CORS middleware
 │   ├── hub_test.go          # Hub unit tests
 │   └── auth_test.go         # Auth unit tests
+├── docs/                    # MCP tool playbook (rules, conventions, patterns)
+│   └── README.md            # Start here when scaffolding other MCP tools
 ├── Dockerfile               # Multi-stage build, non-root, healthcheck
 ├── .env.example
 └── README.md

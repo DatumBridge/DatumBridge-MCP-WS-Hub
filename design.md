@@ -2,7 +2,9 @@
 
 ## Purpose
 
-The MCP WebSocket Hub acts as a relay between the DatumBridge cloud platform (which speaks HTTP) and DTBClaw edge devices (which run local MCP servers over WebSocket). It is **not** an MCP server itself — it is a transparent proxy that forwards JSON-RPC messages and correlates request/response pairs.
+The MCP WebSocket Hub acts as a relay between the DatumBridge cloud platform (which speaks HTTP) and DTBClaw edge devices (which run local MCP servers over WebSocket). The **core transport** is a transparent HTTP↔WebSocket proxy that forwards JSON-RPC and correlates request/response pairs.
+
+> **Role update:** The shipped service also exposes Streamable HTTP `POST /mcp` (session + `tools/list` / `tools/call`) plus an embedded edge catalog for DatumBridge publish/approve. Treat this as a **relay with an MCP façade**, not a generic tool-server template. See [`docs/adr/ADR-0001-transport-vs-tool-server.md`](docs/adr/ADR-0001-transport-vs-tool-server.md) and the playbook at [`docs/README.md`](docs/README.md).
 
 ## Architecture
 
@@ -18,15 +20,16 @@ The MCP WebSocket Hub acts as a relay between the DatumBridge cloud platform (wh
 
 ## Key Design Decisions
 
-### 1. WebSocket Proxy (not MCP Server)
+### 1. Dual surface: opaque proxy + MCP façade
 
-The hub does not implement MCP tools. It acts purely as an HTTP-to-WebSocket bridge:
-- Cloud sends `POST /api/v1/devices/{id}/mcp` with JSON-RPC body
+**Core transport (opaque proxy):** The hub remains an HTTP↔WebSocket bridge for device MCP traffic:
+- Cloud sends `POST /api/v1/devices/{id}/mcp` with a JSON-RPC body
 - Hub forwards the body to the device over WebSocket
-- Device processes the MCP request and sends JSON-RPC response
-- Hub correlates the response using `deviceID|rpcID` and returns it to the HTTP caller
+- Device processes the request and returns a JSON-RPC response
+- Hub correlates using `deviceID|rpcID` and returns the response to the HTTP caller
+- On this path the hub does **not** interpret tool semantics
 
-This keeps the hub stateless regarding MCP semantics.
+**Additive MCP façade:** Separately, `POST /mcp` implements Streamable HTTP (`initialize` → `Mcp-Session-Id`, `tools/list`, `tools/call`) so DatumBridge publish/approve can discover hub builtins and catalog-backed edge relay tools. That façade is a platform integration, not permission to treat this repo as the default template for SaaS tool-servers. See `docs/adr/ADR-0001-transport-vs-tool-server.md`.
 
 ### 2. Device Authentication
 
@@ -62,11 +65,14 @@ WebSocket connections use gorilla/websocket ping/pong:
 | Layer | Mechanism |
 |-------|-----------|
 | Token storage | bcrypt (cost 10) |
-| Registration | Protected by `HUB_REGISTER_API_KEY` (optional) |
-| WebSocket | Token validated before upgrade |
-| CORS | `HUB_ALLOWED_ORIGINS` (configurable) |
+| Registration | `HUB_REGISTER_API_KEY` — **required in production**; empty allows open register (local-dev only) |
+| WebSocket | Token validated before upgrade; Origin allowlist via `HUB_ALLOWED_ORIGINS` (**required in production**; never `*`) |
+| CORS | Same origin allowlist as WS when set |
 | Body size | 1 MB limit via `http.MaxBytesReader` |
 | Container | Non-root user in Docker |
+| MCP façade | `Mcp-Session-Id` continuity; production callers must use Studio/gateway auth (session ≠ identity) |
+
+**Known hub debt (do not copy into new relays):** some admin/pairing GETs and confirm are not API-key gated in the current code. Production deployments should front the hub with network policy / Studio auth and treat open admin routes as a gap. Playbook target: enforce admin key on all admin routes from day one — see `docs/playbook/SECURITY_RULES.md`.
 
 ### 6. Error Response Format
 
