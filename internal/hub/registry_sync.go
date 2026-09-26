@@ -61,7 +61,7 @@ func EdgeCatalogRegistryToolBodies(mcpServerID string) ([]map[string]interface{}
 				"inputSchema":  inSchema,
 				"outputSchema": map[string]interface{}{"type": "object"},
 			},
-			"capabilities": []string{"edge_device", "mcp_ws_hub", profile},
+			"capabilities": edgeCapabilitiesForTool(et.McpToolName, profile),
 			"tags":         []string{"edge-device", "manifest:" + profile, "ws-hub"},
 			"docs":         m.Description,
 			"edgeDevice": map[string]interface{}{

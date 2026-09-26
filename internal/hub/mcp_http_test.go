@@ -64,6 +64,9 @@ func TestMCPStreamableHTTP_InitializeAndToolsList(t *testing.T) {
 		Result struct {
 			Tools []struct {
 				Name string `json:"name"`
+				Meta struct {
+					Capabilities []string `json:"capabilities"`
+				} `json:"_meta"`
 			} `json:"tools"`
 		} `json:"result"`
 		Error *struct {
@@ -80,15 +83,36 @@ func TestMCPStreamableHTTP_InitializeAndToolsList(t *testing.T) {
 		t.Fatalf("expected hub builtins + DTBClaw edge catalog (many tools), got %d", len(listResp.Result.Tools))
 	}
 	var sawShell bool
+	var shellCaps, fileCaps []string
 	for _, tl := range listResp.Result.Tools {
 		if tl.Name == "shell" {
 			sawShell = true
-			break
+			shellCaps = tl.Meta.Capabilities
+		}
+		if tl.Name == "file_read" {
+			fileCaps = tl.Meta.Capabilities
 		}
 	}
 	if !sawShell {
 		t.Fatal("expected native edge tool shell in tools/list")
 	}
+	if len(shellCaps) == 0 || len(fileCaps) == 0 {
+		t.Fatalf("expected _meta.capabilities on shell and file_read, got %v / %v", shellCaps, fileCaps)
+	}
+	if joinCaps(shellCaps) == joinCaps(fileCaps) {
+		t.Fatalf("shell and file_read should have distinct capabilities, got %v", shellCaps)
+	}
+}
+
+func joinCaps(in []string) string {
+	out := ""
+	for i, s := range in {
+		if i > 0 {
+			out += ","
+		}
+		out += s
+	}
+	return out
 }
 
 func TestMCPStreamableHTTP_ToolsListRejectsMissingSession(t *testing.T) {

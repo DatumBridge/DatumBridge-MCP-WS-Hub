@@ -1,5 +1,11 @@
 # Changelog — MCP Tool Playbook Docs
 
+## 2026-09-26
+
+### Changed
+
+- `tools/list` and edge registry sync now publish per-tool `_meta.capabilities` from the edge catalog, so Tool Registry setup does not need a single shared capability list for every hub tool.
+
 ## 2026-07-15
 
 ### Added

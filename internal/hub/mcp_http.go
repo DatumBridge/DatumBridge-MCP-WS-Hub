@@ -106,7 +106,16 @@ func (h *Hub) handleMCPToolsList(w http.ResponseWriter, r *http.Request, id json
 	writeMCPRPCResult(w, id, map[string]interface{}{"tools": tools})
 }
 
+func mcpListProfile() string {
+	m, err := dtbClawCatalog()
+	if err != nil || m == nil {
+		return ""
+	}
+	return m.Profile
+}
+
 func mcpBuiltinToolDescriptors() []map[string]interface{} {
+	profile := mcpListProfile()
 	return []map[string]interface{}{
 		{
 			"name":        "hub_info",
@@ -115,6 +124,7 @@ func mcpBuiltinToolDescriptors() []map[string]interface{} {
 				"type":       "object",
 				"properties": map[string]interface{}{},
 			},
+			"_meta": capabilityMeta("hub_info", profile),
 		},
 		{
 			"name":        "forward_jsonrpc_to_device",
@@ -133,6 +143,7 @@ func mcpBuiltinToolDescriptors() []map[string]interface{} {
 				},
 				"required": []string{"device_id", "jsonrpc_request"},
 			},
+			"_meta": capabilityMeta("forward_jsonrpc_to_device", profile),
 		},
 	}
 }

@@ -211,7 +211,7 @@ Inside the cluster, `datumbridge-mcp` uses **in-cluster** tool/base URLs like
 
 ## DatumBridge MCP publish / Request Approve
 
-The platform’s MCP service calls `POST {baseURL}/mcp` with JSON-RPC `initialize` and `tools/list` (same contract as `google-drive-mcp` via FastMCP HTTP). This hub implements that subset so tools can be registered after deploy.
+The platform’s MCP service calls `POST {baseURL}/mcp` with JSON-RPC `initialize` and `tools/list` (same contract as `google-drive-mcp` via FastMCP HTTP). This hub implements that subset so tools can be registered after deploy. Each `tools/list` entry includes `_meta.capabilities` so Tool Registry business capabilities fill automatically on Setup / re-publish.
 
 - Set **`server_port` to `8000`** (or your `HUB_PORT`) when publishing so `datumbridge-mcp` builds the correct Kubernetes endpoint.
 - Advertised tools:

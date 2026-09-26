@@ -127,6 +127,7 @@ func edgeRelayToolDescriptors() ([]map[string]interface{}, error) {
 			"name":        t.McpToolName,
 			"description": desc,
 			"inputSchema": schema,
+			"_meta":       capabilityMeta(t.McpToolName, m.Profile),
 		}
 		if len(t.Metadata) > 0 {
 			entry["metadata"] = cloneMap(t.Metadata)
