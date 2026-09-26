@@ -116,34 +116,46 @@ func mcpListProfile() string {
 
 func mcpBuiltinToolDescriptors() []map[string]interface{} {
 	profile := mcpListProfile()
+	hubSchema, hubDesc := annotateDeclaredCapabilities(
+		map[string]interface{}{
+			"type":       "object",
+			"properties": map[string]interface{}{},
+		},
+		"Return hub service metadata and a summary of registered / connected edge devices. Does not invoke device MCP.",
+		"hub_info",
+		profile,
+	)
+	fwdSchema, fwdDesc := annotateDeclaredCapabilities(
+		map[string]interface{}{
+			"type": "object",
+			"properties": map[string]interface{}{
+				"device_id": map[string]interface{}{
+					"type":        "string",
+					"description": "Registered device_id with an active WebSocket to the hub",
+				},
+				"jsonrpc_request": map[string]interface{}{
+					"type":        "object",
+					"description": "Full JSON-RPC object to send (e.g. {\"jsonrpc\":\"2.0\",\"id\":1,\"method\":\"tools/list\",\"params\":{}})",
+				},
+			},
+			"required": []string{"device_id", "jsonrpc_request"},
+		},
+		"Forward a JSON-RPC 2.0 payload to a connected edge device MCP server (same path as POST /api/v1/devices/{device_id}/mcp).",
+		"forward_jsonrpc_to_device",
+		profile,
+	)
 	return []map[string]interface{}{
 		{
 			"name":        "hub_info",
-			"description": "Return hub service metadata and a summary of registered / connected edge devices. Does not invoke device MCP.",
-			"inputSchema": map[string]interface{}{
-				"type":       "object",
-				"properties": map[string]interface{}{},
-			},
-			"_meta": capabilityMeta("hub_info", profile),
+			"description": hubDesc,
+			"inputSchema": hubSchema,
+			"_meta":       capabilityMeta("hub_info", profile),
 		},
 		{
 			"name":        "forward_jsonrpc_to_device",
-			"description": "Forward a JSON-RPC 2.0 payload to a connected edge device MCP server (same path as POST /api/v1/devices/{device_id}/mcp).",
-			"inputSchema": map[string]interface{}{
-				"type": "object",
-				"properties": map[string]interface{}{
-					"device_id": map[string]interface{}{
-						"type":        "string",
-						"description": "Registered device_id with an active WebSocket to the hub",
-					},
-					"jsonrpc_request": map[string]interface{}{
-						"type":        "object",
-						"description": "Full JSON-RPC object to send (e.g. {\"jsonrpc\":\"2.0\",\"id\":1,\"method\":\"tools/list\",\"params\":{}})",
-					},
-				},
-				"required": []string{"device_id", "jsonrpc_request"},
-			},
-			"_meta": capabilityMeta("forward_jsonrpc_to_device", profile),
+			"description": fwdDesc,
+			"inputSchema": fwdSchema,
+			"_meta":       capabilityMeta("forward_jsonrpc_to_device", profile),
 		},
 	}
 }

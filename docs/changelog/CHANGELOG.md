@@ -4,7 +4,7 @@
 
 ### Changed
 
-- `tools/list` and edge registry sync now publish per-tool `_meta.capabilities` from the edge catalog, so Tool Registry setup does not need a single shared capability list for every hub tool.
+- `tools/list` and edge registry sync publish only that tool's capability tags. The shared `edge_device` / `mcp_ws_hub` / profile stamp is not applied to every hub tool.
 
 ## 2026-07-15
 

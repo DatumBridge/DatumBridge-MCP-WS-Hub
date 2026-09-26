@@ -1,7 +1,9 @@
 package hub
 
-// registryToolCapabilityExtras maps MCP tool names to Tool Registry capability
-// tags beyond the shared edge_device / mcp_ws_hub / profile stamps.
+import "strings"
+
+// registryToolCapabilityExtras maps MCP tool names to that tool's own
+// Tool Registry capability tags. A server-wide stamp is not added.
 var registryToolCapabilityExtras = map[string][]string{
 	"shell":                    {"shell", "device_control"},
 	"process":                  {"shell", "device_control"},
@@ -53,15 +55,26 @@ var registryToolCapabilityExtras = map[string][]string{
 	"forward_jsonrpc_to_device": {"network"},
 }
 
-func edgeCapabilitiesForTool(mcpToolName, profile string) []string {
-	caps := []string{"edge_device", "mcp_ws_hub"}
-	if profile != "" {
-		caps = append(caps, profile)
+func edgeCapabilitiesForTool(mcpToolName, _ string) []string {
+	if extras, ok := registryToolCapabilityExtras[mcpToolName]; ok && len(extras) > 0 {
+		return append([]string{}, extras...)
 	}
-	if extras, ok := registryToolCapabilityExtras[mcpToolName]; ok {
-		caps = append(caps, extras...)
+	if mcpToolName == "" {
+		return nil
 	}
-	return caps
+	return []string{mcpToolName}
+}
+
+func annotateDeclaredCapabilities(schema map[string]interface{}, desc, name, profile string) (map[string]interface{}, string) {
+	caps := edgeCapabilitiesForTool(name, profile)
+	if schema == nil {
+		schema = map[string]interface{}{"type": "object", "properties": map[string]interface{}{}}
+	}
+	schema["x-datumbridge-capabilities"] = caps
+	if len(caps) > 0 && !strings.Contains(strings.ToLower(desc), "capabilities:") {
+		desc = strings.TrimSpace(desc) + "\nCapabilities: " + strings.Join(caps, ", ")
+	}
+	return schema, desc
 }
 
 func capabilityMeta(name, profile string) map[string]interface{} {

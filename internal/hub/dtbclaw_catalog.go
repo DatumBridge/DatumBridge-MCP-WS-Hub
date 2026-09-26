@@ -122,6 +122,7 @@ func edgeRelayToolDescriptors() ([]map[string]interface{}, error) {
 		if m.Profile != "" {
 			desc += " (profile: " + m.Profile + ")"
 		}
+		schema, desc = annotateDeclaredCapabilities(schema, desc, t.McpToolName, m.Profile)
 
 		entry := map[string]interface{}{
 			"name":        t.McpToolName,
