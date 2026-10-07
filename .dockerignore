@@ -18,6 +18,8 @@ mcp-ws-hub
 
 # Documentation and design (not needed in runtime image)
 *.md
+!registry_docs/
+!registry_docs/*.md
 design.md
 
 # IDE and editor

@@ -125,6 +125,7 @@ func mcpBuiltinToolDescriptors() []map[string]interface{} {
 		"hub_info",
 		profile,
 	)
+	attachRegistryDocs(hubSchema, "hub_info")
 	fwdSchema, fwdDesc := annotateDeclaredCapabilities(
 		map[string]interface{}{
 			"type": "object",
@@ -144,6 +145,7 @@ func mcpBuiltinToolDescriptors() []map[string]interface{} {
 		"forward_jsonrpc_to_device",
 		profile,
 	)
+	attachRegistryDocs(fwdSchema, "forward_jsonrpc_to_device")
 	return []map[string]interface{}{
 		{
 			"name":        "hub_info",

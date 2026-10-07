@@ -9,6 +9,7 @@ COPY go.mod go.sum ./
 RUN go mod download
 COPY cmd/ ./cmd/
 COPY internal/ ./internal/
+COPY registry_docs/ ./registry_docs/
 RUN CGO_ENABLED=0 go build -o /mcp-ws-hub ./cmd/api
 
 FROM alpine:3.19
