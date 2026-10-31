@@ -10,8 +10,8 @@ Use this when opening a new MCP service. Default path is **Python tool-server**.
 
 ## 1. Scaffold
 
-- [ ] Create repo tree from [PROJECT_STRUCTURE](PROJECT_STRUCTURE.md)
-- [ ] Apply template: [Python](TEMPLATE_PYTHON_TOOL_SERVER.md) or [Go relay](TEMPLATE_GO_RELAY.md)
+- [ ] Create repo tree from [PROJECT_STRUCTURE](PROJECT_STRUCTURE.md), or copy `mcp/templates/mcp-tool` for any language
+- [ ] Apply template: [language-neutral folder](../../../templates/mcp-tool/README.md), [Python](TEMPLATE_PYTHON_TOOL_SERVER.md), or [Go relay](TEMPLATE_GO_RELAY.md)
 - [ ] Add `README.md`, `design.md`, `.env.example`, Dockerfile
 
 ## 2. Platform contracts

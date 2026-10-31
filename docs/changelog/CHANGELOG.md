@@ -1,5 +1,11 @@
 # Changelog — MCP Tool Playbook Docs
 
+## 2026-10-26
+
+### Changed
+
+- New MCP checklist points at `mcp/templates/mcp-tool` for a language-neutral tool-server. Python and Go relay templates stay for those classes.
+
 ## 2026-09-26
 
 ### Changed
